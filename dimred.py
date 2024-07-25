@@ -35,7 +35,7 @@ def run_method(adata, method):
     return adata, elapsed
 
 
-def run_all(methods_list):
+def run_all(methods_list, regression_degree):
     adatas_list = load_adatas()
     times_dict = {method: {} for method in methods_list}
 
@@ -47,11 +47,11 @@ def run_all(methods_list):
             times_dict[method][adata.n_obs] = time_mes
 
     for method in methods_list:
-        scatter_and_line(times_dict[method], method)
+        scatter_and_line(times_dict[method], method, regression_degree)
     plt.show()
 
     return times_dict, adatas_list
 
 
 methods = ["PCA", "PHATE", "tSNE", "Diffmap"]
-times, adatas = run_all(methods)
+times, adatas = run_all(methods, 1)

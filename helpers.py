@@ -25,11 +25,11 @@ def polynomial_regression(x, y, degree):
     return pred
 
 
-def scatter_and_line(times_dict, label):
+def scatter_and_line(times_dict, label, degree):
     times_dict = dict(sorted(times_dict.items()))
     keys = fromiter(times_dict.keys(), dtype=float).reshape(-1, 1)
     vals = fromiter(times_dict.values(), dtype=float)
-    pred = polynomial_regression(keys, vals, 2)
+    pred = polynomial_regression(keys, vals, degree)
     plt.scatter(keys, vals, label=label)
     plt.plot(sorted(keys), pred)
     plt.legend()
