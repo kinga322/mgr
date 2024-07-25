@@ -15,13 +15,32 @@ main_folder_path = "/home/kszyman/Downloads/GSE161529_RAW"
 
 subfolders = [f.path for f in os.scandir(main_folder_path) if f.is_dir()]
 
-for subdir in subfolders:
+
+def run_method(adata, method):
+    start_time = time.time()
+    if method == "SIMLR":
+        x = adata.X
+        simlr = SIMLR(x, 5)
+        adata.obsm['X_simlr'] = simlr
+    elif method == "PCA":
+        sc.pp.pca(adata)
+    elif method == "PHATE":
+        sc.external.tl.phate(adata)
+    elif method == "tSNE":
+        sc.tl.tsne(adata)
+    end_time = time.time()
+    return adata, end_time - start_time
+
+
+def read_adata(folder):
     adata = sc.read_10x_mtx(subdir)
+    return adata
+
+
+for subdir in subfolders:
+    adata = read_adata(subdir)
     sc.pp.filter_cells(adata, min_genes=10)
-    start = time.time()
-    sc.external.tl.phate(adata)
-    end = time.time()
-    phate_time = end - start
+    phate_time = run_method(adata, "PHATE")
     start = time.time()
     sc.pp.pca(adata)
     end = time.time()
@@ -34,8 +53,11 @@ for subdir in subfolders:
     tsne_time = end - start
     times['tSNE'][adata.n_obs] = tsne_time
     X = adata.X
-
+    start = time.time()
     X_simlr = SIMLR(X, 5)
+    end = time.time()
+    simlr_time = end - start
+    times['SIMLR'][adata.n_obs] = simlr_time
     adatas.append(adata)
 
 print(times['PCA'])
@@ -47,15 +69,15 @@ print(times['PCA'])
 
 def scatter_and_line(times_dict, label):
     times_dict = dict(sorted(times_dict.items()))
-    keys_phate = np.fromiter(times.keys(), dtype=float).reshape(-1, 1)
-    vals_phate = np.fromiter(times.values(), dtype=float)
+    keys = np.fromiter(times_dict.keys(), dtype=float).reshape(-1, 1)
+    vals = np.fromiter(times_dict.values(), dtype=float)
     poly = PolynomialFeatures(degree=2, include_bias=False)
-    poly_feat = poly.fit_transform(keys_phate, vals_phate)
+    poly_feat = poly.fit_transform(keys, vals)
     poly_reg_model = LinearRegression()
-    poly_reg_model.fit(poly_feat, vals_phate)
+    poly_reg_model.fit(poly_feat, vals)
     pred2 = poly_reg_model.predict(poly_feat)
-    plt.scatter(keys_phate, vals_phate, label=label)
-    plt.plot(sorted(keys_phate), pred2)
+    plt.scatter(keys, vals, label=label)
+    plt.plot(sorted(keys), pred2)
     plt.legend()
 
 
