@@ -41,7 +41,7 @@ print(pca_times)
 # sc.pl.embedding(pr1, "X_phate", color="leiden")
 
 
-def scatter_and_line(times):
+def scatter_and_line(times, label):
     times = dict(sorted(times.items()))
     keys_phate = np.fromiter(times.keys(), dtype=float).reshape(-1, 1)
     vals_phate = np.fromiter(times.values(), dtype=float)
@@ -50,12 +50,12 @@ def scatter_and_line(times):
     poly_reg_model = LinearRegression()
     poly_reg_model.fit(poly_feat, vals_phate)
     pred2 = poly_reg_model.predict(poly_feat)
-    plt.scatter(keys_phate, vals_phate, label="PHATE")
-    plt.plot(sorted(keys_phate), pred2, label="PHATE")
+    plt.scatter(keys_phate, vals_phate, label=label)
+    plt.plot(sorted(keys_phate), pred2)
     plt.legend()
-    plt.show()
 
 
-scatter_and_line(pca_times)
-scatter_and_line(phate_times)
-scatter_and_line(tsne_times)
+scatter_and_line(pca_times, "PCA")
+scatter_and_line(phate_times, "PHATE")
+scatter_and_line(tsne_times, "t-SNE")
+plt.show()
