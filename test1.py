@@ -6,8 +6,10 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 
-pca_times={}
-phate_times={}
+pca_times = {}
+phate_times = {}
+tsne_times = {}
+adatas = []
 
 main_folder_path = "/home/kszyman/Downloads/GSE161529_RAW"
 
@@ -25,6 +27,12 @@ for subdir in subfolders:
     pca_time = end - start
     pca_times[adata.n_obs] = pca_time
     phate_times[adata.n_obs] = phate_time
+    start = time.time()
+    sc.tl.tsne(adata)
+    end = time.time()
+    tsne_time = end - start
+    tsne_times[adata.n_obs] = tsne_time
+    adatas.append(adata)
 
 print(pca_times)
 # sc.pp.neighbors(pr1)
@@ -33,23 +41,21 @@ print(pca_times)
 # sc.pl.embedding(pr1, "X_phate", color="leiden")
 
 
+def scatter_and_line(times):
+    times = dict(sorted(times.items()))
+    keys_phate = np.fromiter(times.keys(), dtype=float).reshape(-1, 1)
+    vals_phate = np.fromiter(times.values(), dtype=float)
+    poly = PolynomialFeatures(degree=2, include_bias=False)
+    poly_feat = poly.fit_transform(keys_phate, vals_phate)
+    poly_reg_model = LinearRegression()
+    poly_reg_model.fit(poly_feat, vals_phate)
+    pred2 = poly_reg_model.predict(poly_feat)
+    plt.scatter(keys_phate, vals_phate, label="PHATE")
+    plt.plot(sorted(keys_phate), pred2, label="PHATE")
+    plt.legend()
+    plt.show()
 
-keys = np.fromiter(pca_times.keys(), dtype=float).reshape(-1, 1)
-vals = np.fromiter(pca_times.values(), dtype=float)
-reg = LinearRegression().fit(keys, vals)
-pred = reg.predict(keys)
-plt.plot(keys, pred)
-plt.scatter(*zip(*sorted(pca_times.items())))
-plt.show()
 
-phate_times = dict(sorted(phate_times.items()))
-keys_phate = np.fromiter(phate_times.keys(), dtype=float).reshape(-1, 1)
-vals_phate = np.fromiter(phate_times.values(), dtype=float)
-poly = PolynomialFeatures(degree=2, include_bias=False)
-poly_feat = poly.fit_transform(keys_phate, vals_phate)
-poly_reg_model = LinearRegression()
-poly_reg_model.fit(poly_feat, vals)
-pred2 = poly_reg_model.predict(poly_feat)
-plt.scatter(keys_phate, vals_phate)
-plt.plot(sorted(keys_phate), pred2)
-plt.show()
+scatter_and_line(pca_times)
+scatter_and_line(phate_times)
+scatter_and_line(tsne_times)
