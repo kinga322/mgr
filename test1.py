@@ -7,14 +7,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from SIMLR import SIMLR
 
-methods = ["SIMLR", "PCA", "PHATE", "tSNE"]
-times = {method: {} for method in methods}
-adatas = []
-
-main_folder_path = "/home/kszyman/Downloads/GSE161529_RAW"
-
-subfolders = [f.path for f in os.scandir(main_folder_path) if f.is_dir()]
-
 
 def run_method(adata, method):
     start_time = time.time()
@@ -33,34 +25,10 @@ def run_method(adata, method):
 
 
 def read_adata(folder):
-    adata = sc.read_10x_mtx(subdir)
+    adata = sc.read_10x_mtx(folder)
     return adata
 
 
-for subdir in subfolders:
-    adata = read_adata(subdir)
-    sc.pp.filter_cells(adata, min_genes=10)
-    phate_time = run_method(adata, "PHATE")
-    start = time.time()
-    sc.pp.pca(adata)
-    end = time.time()
-    pca_time = end - start
-    times['PCA'][adata.n_obs] = pca_time
-    times["PHATE"][adata.n_obs] = phate_time
-    start = time.time()
-    sc.tl.tsne(adata)
-    end = time.time()
-    tsne_time = end - start
-    times['tSNE'][adata.n_obs] = tsne_time
-    X = adata.X
-    start = time.time()
-    X_simlr = SIMLR(X, 5)
-    end = time.time()
-    simlr_time = end - start
-    times['SIMLR'][adata.n_obs] = simlr_time
-    adatas.append(adata)
-
-print(times['PCA'])
 # sc.pp.neighbors(pr1)
 # sc.tl.leiden(pr1, flavor="igraph", n_iterations=2, directed=False)
 
@@ -81,10 +49,26 @@ def scatter_and_line(times_dict, label):
     plt.legend()
 
 
-scatter_and_line(times['PCA'], "PCA")
-scatter_and_line(times["PHATE"], "PHATE")
-scatter_and_line(times['tSNE'], "t-SNE")
+def run_all(main_folder, methods_list):
+    adatas_list = []
+    times_dict = {method: {} for method in methods_list}
+    subfolders = [f.path for f in os.scandir(main_folder) if f.is_dir()]
+    for subdir in subfolders:
+        adata = read_adata(subdir)
+        sc.pp.filter_cells(adata, min_genes=10)
+        for method in methods_list:
+            adata, time_mes = run_method(adata, method)
+            times_dict[method][adata.n_obs] = time_mes
 
-for method in methods:
-    scatter_and_line(times[method], method)
-plt.show()
+        adatas_list.append(adata)
+
+    for method in methods_list:
+        scatter_and_line(times_dict[method], method)
+    plt.show()
+
+    return times_dict, adatas_list
+
+
+methods = ["SIMLR", "PCA", "PHATE", "tSNE"]
+main_folder_path = "/home/kszyman/Downloads/GSE161529_RAW"
+times, adatas = run_all(main_folder_path, methods)
