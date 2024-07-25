@@ -39,7 +39,8 @@ def run_all(methods_list):
     adatas_list = load_adatas()
     times_dict = {method: {} for method in methods_list}
 
-    for adata in adatas_list:
+    for i, adata in enumerate(adatas_list):
+        print(i)
         print(adata.filename)
         for method in methods_list:
             adata, time_mes = run_method(adata, method)
