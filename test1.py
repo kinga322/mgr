@@ -5,15 +5,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
+from SIMLR import SIMLR
 
-pca_times = {}
-phate_times = {}
-tsne_times = {}
+methods = ["SIMLR", "PCA", "PHATE", "tSNE"]
+times = {method: {} for method in methods}
 adatas = []
 
 main_folder_path = "/home/kszyman/Downloads/GSE161529_RAW"
 
 subfolders = [f.path for f in os.scandir(main_folder_path) if f.is_dir()]
+
 for subdir in subfolders:
     adata = sc.read_10x_mtx(subdir)
     sc.pp.filter_cells(adata, min_genes=10)
@@ -25,24 +26,27 @@ for subdir in subfolders:
     sc.pp.pca(adata)
     end = time.time()
     pca_time = end - start
-    pca_times[adata.n_obs] = pca_time
-    phate_times[adata.n_obs] = phate_time
+    times['PCA'][adata.n_obs] = pca_time
+    times["PHATE"][adata.n_obs] = phate_time
     start = time.time()
     sc.tl.tsne(adata)
     end = time.time()
     tsne_time = end - start
-    tsne_times[adata.n_obs] = tsne_time
+    times['tSNE'][adata.n_obs] = tsne_time
+    X = adata.X
+
+    X_simlr = SIMLR(X, 5)
     adatas.append(adata)
 
-print(pca_times)
+print(times['PCA'])
 # sc.pp.neighbors(pr1)
 # sc.tl.leiden(pr1, flavor="igraph", n_iterations=2, directed=False)
 
 # sc.pl.embedding(pr1, "X_phate", color="leiden")
 
 
-def scatter_and_line(times, label):
-    times = dict(sorted(times.items()))
+def scatter_and_line(times_dict, label):
+    times_dict = dict(sorted(times_dict.items()))
     keys_phate = np.fromiter(times.keys(), dtype=float).reshape(-1, 1)
     vals_phate = np.fromiter(times.values(), dtype=float)
     poly = PolynomialFeatures(degree=2, include_bias=False)
@@ -55,7 +59,10 @@ def scatter_and_line(times, label):
     plt.legend()
 
 
-scatter_and_line(pca_times, "PCA")
-scatter_and_line(phate_times, "PHATE")
-scatter_and_line(tsne_times, "t-SNE")
+scatter_and_line(times['PCA'], "PCA")
+scatter_and_line(times["PHATE"], "PHATE")
+scatter_and_line(times['tSNE'], "t-SNE")
+
+for method in methods:
+    scatter_and_line(times[method], method)
 plt.show()
