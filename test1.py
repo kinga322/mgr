@@ -1,27 +1,39 @@
 import scanpy as sc
+import scanpy.external as sce
 import os
 import time
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
-from SIMLR import SIMLR
+# from SIMLR import SIMLR
 
 
 def run_method(adata, method):
     start_time = time.time()
+
+    """    
     if method == "SIMLR":
-        x = adata.X
-        simlr = SIMLR(x, 5)
-        adata.obsm['X_simlr'] = simlr
-    elif method == "PCA":
+    x = adata.X
+    simlr = SIMLR(x, 5)
+    adata.obsm['X_simlr'] = simlr
+    """
+
+    if method == "PCA":
         sc.pp.pca(adata)
     elif method == "PHATE":
-        sc.external.tl.phate(adata)
+        sce.tl.phate(adata)
     elif method == "tSNE":
         sc.tl.tsne(adata)
+    elif method == "UMAP":
+        sc.tl.umap(adata)
+    elif method == "Diffmap":
+        sc.pp.neighbors(adata)
+        sc.tl.diffmap(adata)
     end_time = time.time()
-    return adata, end_time - start_time
+    elapsed = end_time - start_time
+    print(elapsed)
+    return adata, elapsed
 
 
 def read_adata(folder):
@@ -69,6 +81,6 @@ def run_all(main_folder, methods_list):
     return times_dict, adatas_list
 
 
-methods = ["SIMLR", "PCA", "PHATE", "tSNE"]
+methods = ["PCA", "PHATE", "tSNE", "Diffmap"]
 main_folder_path = "/home/kszyman/Downloads/GSE161529_RAW"
 times, adatas = run_all(main_folder_path, methods)
