@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
+from helpers import load_adatas
 # from SIMLR import SIMLR
 
 
@@ -36,11 +37,6 @@ def run_method(adata, method):
     return adata, elapsed
 
 
-def read_adata(folder):
-    adata = sc.read_10x_mtx(folder)
-    return adata
-
-
 # sc.pp.neighbors(pr1)
 # sc.tl.leiden(pr1, flavor="igraph", n_iterations=2, directed=False)
 
@@ -62,17 +58,13 @@ def scatter_and_line(times_dict, label):
 
 
 def run_all(main_folder, methods_list):
-    adatas_list = []
+    adatas_list = load_adatas()
     times_dict = {method: {} for method in methods_list}
-    subfolders = [f.path for f in os.scandir(main_folder) if f.is_dir()]
-    for subdir in subfolders:
-        adata = read_adata(subdir)
-        sc.pp.filter_cells(adata, min_genes=10)
+
+    for adata in adatas_list:
         for method in methods_list:
             adata, time_mes = run_method(adata, method)
             times_dict[method][adata.n_obs] = time_mes
-
-        adatas_list.append(adata)
 
     for method in methods_list:
         scatter_and_line(times_dict[method], method)
