@@ -1,13 +1,11 @@
 import scanpy as sc
 import scanpy.external as sce
-import os
 import time
 import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import PolynomialFeatures
-from helpers import load_adatas
+from helpers import load_adatas, scatter_and_line
 # from SIMLR import SIMLR
+
+# assumes there's "h5ad" directory in current workdir containing h5ad files
 
 
 def run_method(adata, method):
@@ -37,31 +35,12 @@ def run_method(adata, method):
     return adata, elapsed
 
 
-# sc.pp.neighbors(pr1)
-# sc.tl.leiden(pr1, flavor="igraph", n_iterations=2, directed=False)
-
-# sc.pl.embedding(pr1, "X_phate", color="leiden")
-
-
-def scatter_and_line(times_dict, label):
-    times_dict = dict(sorted(times_dict.items()))
-    keys = np.fromiter(times_dict.keys(), dtype=float).reshape(-1, 1)
-    vals = np.fromiter(times_dict.values(), dtype=float)
-    poly = PolynomialFeatures(degree=2, include_bias=False)
-    poly_feat = poly.fit_transform(keys, vals)
-    poly_reg_model = LinearRegression()
-    poly_reg_model.fit(poly_feat, vals)
-    pred2 = poly_reg_model.predict(poly_feat)
-    plt.scatter(keys, vals, label=label)
-    plt.plot(sorted(keys), pred2)
-    plt.legend()
-
-
-def run_all(main_folder, methods_list):
+def run_all(methods_list):
     adatas_list = load_adatas()
     times_dict = {method: {} for method in methods_list}
 
     for adata in adatas_list:
+        print(adata.filename)
         for method in methods_list:
             adata, time_mes = run_method(adata, method)
             times_dict[method][adata.n_obs] = time_mes
@@ -74,5 +53,4 @@ def run_all(main_folder, methods_list):
 
 
 methods = ["PCA", "PHATE", "tSNE", "Diffmap"]
-main_folder_path = "/home/kszyman/Downloads/GSE161529_RAW"
-times, adatas = run_all(main_folder_path, methods)
+times, adatas = run_all(methods)
