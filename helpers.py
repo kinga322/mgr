@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 from os import listdir
 from anndata import read_h5ad
 from sklearn.linear_model import LinearRegression
@@ -11,7 +12,6 @@ def load_adatas():
     names = listdir('./h5ad')
     for name in names:
         adata = read_h5ad(f"./h5ad/{name}")
-        adata.filename = name
         adatas.append(adata)
     return adatas
 

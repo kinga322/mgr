@@ -8,7 +8,7 @@ from helpers import load_adatas, scatter_and_line
 # assumes there's "h5ad" directory in current workdir containing h5ad files
 
 
-def run_method(adata, method):
+def run_method(adata, method, n_neighbors=5):
     start_time = time.time()
 
     """    
@@ -25,9 +25,10 @@ def run_method(adata, method):
     elif method == "tSNE":
         sc.tl.tsne(adata)
     elif method == "UMAP":
+        sc.pp.neighbors(adata, n_neighbors=n_neighbors)
         sc.tl.umap(adata)
     elif method == "Diffmap":
-        sc.pp.neighbors(adata)
+        sc.pp.neighbors(adata, n_neighbors=n_neighbors)
         sc.tl.diffmap(adata)
     end_time = time.time()
     elapsed = end_time - start_time
@@ -41,7 +42,6 @@ def run_all(methods_list, regression_degree):
 
     for i, adata in enumerate(adatas_list):
         print(i)
-        print(adata.filename)
         for method in methods_list:
             adata, time_mes = run_method(adata, method)
             times_dict[method][adata.n_obs] = time_mes
@@ -53,5 +53,5 @@ def run_all(methods_list, regression_degree):
     return times_dict, adatas_list
 
 
-methods = ["PCA", "PHATE", "tSNE", "Diffmap"]
-times, adatas = run_all(methods, 1)
+# methods = ["PCA", "PHATE", "tSNE", "Diffmap"]
+# times, adatas = run_all(methods, 1)
