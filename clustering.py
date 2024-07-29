@@ -1,9 +1,12 @@
 import scanpy as sc
 import matplotlib.pyplot as plt
 import time
-from sklearn.cluster import KMeans, HDBSCAN
-from helpers import load_adatas
 import numpy as np
+import sklearn.metrics as metrics
+import c_index
+from sklearn.cluster import KMeans, HDBSCAN
+from validclust.validclust import ValidClust
+from gapstatistics.gapstatistics import GapStatistics
 
 
 def cluster(adata, method="leiden"):
@@ -15,12 +18,12 @@ def cluster(adata, method="leiden"):
     elif method == "louvain":
         sc.tl.louvain(adata, flavor="igraph", n_iterations=2)
     elif method == "kmeans":
-        X_pca = adata.obsm['X_pca']
-        kmeans = KMeans(n_clusters=2, random_state=42).fit(X_pca)
+        x_pca = adata.obsm['X_pca']
+        kmeans = KMeans(n_clusters=2, random_state=42).fit(x_pca)
         adata.obs['kmeans'] = kmeans.labels_.astype(str)
     elif method == "HDBSCAN":
-        dense = np.asarray(adata.X.todense())
-        adata.X = dense
+        # dense = np.asarray(adata.X.todense())
+        # adata.X = dense
         x_pca = adata.obsm['X_pca']
         hdb = HDBSCAN(min_cluster_size=10)
         hdb.fit(x_pca)
@@ -35,3 +38,10 @@ def plot_embedding(adata, basis, color):
     sc.pl.embedding(adata, basis, color=color)
     plt.show()
 
+
+metrics.calinski_harabasz_score()
+metrics.davies_bouldin_score()
+metrics.silhouette_score()
+metrics.fowlkes_mallows_score()
+GapStatistics()
+ValidClust()
