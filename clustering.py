@@ -5,6 +5,7 @@ from sklearn.cluster import KMeans, HDBSCAN
 from helpers import load_adatas
 import numpy as np
 
+
 def cluster(adata, method="leiden"):
     start = time.time()
     if 'neighbors' not in adata.uns:
@@ -20,9 +21,9 @@ def cluster(adata, method="leiden"):
     elif method == "HDBSCAN":
         dense = np.asarray(adata.X.todense())
         adata.X = dense
-        X_pca = adata.obsm['X_pca']
+        x_pca = adata.obsm['X_pca']
         hdb = HDBSCAN(min_cluster_size=10)
-        hdb.fit(X_pca)
+        hdb.fit(x_pca)
         labels = [str(x) for x in hdb.labels_]
         adata.obs['hdbscan'] = labels
     end = time.time()
