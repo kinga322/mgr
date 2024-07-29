@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 def run_all(methods_list, regression_degree):
-    adatas_list = load_adatas()
+    adatas_list = load_adatas("./h5ad")
     times_dict = {method: {} for method in methods_list}
 
     for i, adata in enumerate(adatas_list):
@@ -20,5 +20,5 @@ def run_all(methods_list, regression_degree):
     return times_dict, adatas_list
 
 
-methods = ["scVI"]
+methods = ["PCA", "Diffmap"]
 times, adatas = run_all(methods, 1)

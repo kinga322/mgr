@@ -6,11 +6,11 @@ from sklearn.preprocessing import PolynomialFeatures
 from numpy import fromiter
 
 
-def load_adatas():
+def load_adatas(folder):
     adatas = []
-    names = listdir('./h5ad')
+    names = listdir(f"{folder}")
     for name in names:
-        adata = read_h5ad(f"./h5ad/{name}")
+        adata = read_h5ad(f"{folder}/{name}")
         adatas.append(adata)
     return adatas
 

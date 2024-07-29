@@ -1,24 +1,16 @@
 import scanpy as sc
 import scanpy.external as sce
 import time
-import matplotlib.pyplot as plt
-from helpers import load_adatas, scatter_and_line
 from scvi.model import SCVI
-# from SIMLR import SIMLR
-
-# assumes there's "h5ad" directory in current workdir containing h5ad files
+from simlr_py3 import SIMLR_LARGE
 
 
 def run_method(adata, method, n_neighbors=5):
     start_time = time.time()
-
-    """    
     if method == "SIMLR":
-    x = adata.X
-    simlr = SIMLR(x, 5)
-    adata.obsm['X_simlr'] = simlr
-    """
-
+        x = adata.X
+        simlr = SIMLR_LARGE(x, 5)
+        adata.obsm['X_simlr'] = simlr
     if method == "PCA":
         sc.pp.pca(adata)
     elif method == "PHATE":
