@@ -3,10 +3,12 @@ import scanpy.external as sce
 import time
 from scvi.model import SCVI
 from simlr_py3 import SIMLR_LARGE
+import tracemalloc
 
 
 def run_method(adata, method, n_neighbors=5):
     start_time = time.time()
+    tracemalloc.start()
     if method == "SIMLR":
         x = adata.X
         simlr = SIMLR_LARGE(x, 5)
@@ -30,5 +32,9 @@ def run_method(adata, method, n_neighbors=5):
         adata.obsm["X_scvi"] = model.get_latent_representation()
     end_time = time.time()
     elapsed = end_time - start_time
-    print(elapsed)
-    return adata, elapsed
+    print(method)
+    memory = max(tracemalloc.get_traced_memory())
+    print("Memory:" + str(memory))
+    tracemalloc.stop()
+    print("Time:" + str(elapsed))
+    return adata, elapsed, memory
