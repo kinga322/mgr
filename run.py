@@ -20,10 +20,12 @@ def run_all(methods_list):
     return times_dict, memory_dict, adatas_list
 
 
-methods = ["PCA", "Diffmap"]
+methods = ["PHATE", "UMAP"]
 times, memory, adatas = run_all(methods)
 regression_degree = 1
 for method in methods:
     scatter_and_line(times[method], method, regression_degree)
+plt.show()
+for method in methods:
     scatter_and_line(memory[method], method, regression_degree)
 plt.show()
