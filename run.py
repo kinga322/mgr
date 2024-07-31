@@ -22,7 +22,7 @@ def run_all(methods_list):
 
 methods = ["PHATE", "UMAP"]
 times, memory, adatas = run_all(methods)
-regression_degree = 1
+regression_degree = 2
 for method in methods:
     scatter_and_line(times[method], method, regression_degree)
 plt.show()
