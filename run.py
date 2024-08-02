@@ -29,3 +29,9 @@ plt.show()
 for method in methods:
     scatter_and_line(memory[method], method, regression_degree)
 plt.show()
+
+
+# times_new.sort_index(inplace=True)
+"""for col in times_new.columns:
+    plt.plot(times_new[col])
+plt.show()    """

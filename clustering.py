@@ -2,17 +2,15 @@ import scanpy as sc
 import matplotlib.pyplot as plt
 import time
 import numpy as np
-import sklearn.metrics as metrics
 import c_index
 from sklearn.cluster import KMeans, HDBSCAN
 from validclust.validclust import ValidClust
 from gapstatistics.gapstatistics import GapStatistics
 
 
-def cluster(adata, method="leiden"):
+def cluster(adata, embedding, method="leiden"):
     start = time.time()
-    if 'neighbors' not in adata.uns:
-        sc.pp.neighbors(adata)
+    sc.pp.neighbors(adata, use_rep=embedding, key_added=embedding)
     if method == "leiden":
         sc.tl.leiden(adata, flavor="igraph", n_iterations=2, directed=False)
     elif method == "louvain":
@@ -38,10 +36,9 @@ def plot_embedding(adata, basis, color):
     sc.pl.embedding(adata, basis, color=color)
     plt.show()
 
+"""
 
-metrics.calinski_harabasz_score()
-metrics.davies_bouldin_score()
-metrics.silhouette_score()
 metrics.fowlkes_mallows_score()
 GapStatistics()
 ValidClust()
+"""

@@ -6,7 +6,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from numpy import fromiter
 
 
-def load_adatas(folder):
+def load_adatas(folder="h5ad"):
     adatas = []
     names = listdir(f"{folder}")
     for name in names:

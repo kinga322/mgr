@@ -3,6 +3,7 @@ import scanpy.external as sce
 import time
 from scvi.model import SCVI
 from simlr_py3 import SIMLR_LARGE
+from sklearn.decomposition import FastICA
 import tracemalloc
 
 
@@ -22,14 +23,17 @@ def run_method(adata, method, n_neighbors=5):
     elif method == "UMAP":
         sc.pp.neighbors(adata, n_neighbors=n_neighbors)
         sc.tl.umap(adata)
-    elif method == "Diffmap":
-        sc.pp.neighbors(adata, n_neighbors=n_neighbors)
-        sc.tl.diffmap(adata)
     elif method == "scVI":
         SCVI.setup_anndata(adata)
         model = SCVI(adata)
         model.train()
         adata.obsm["X_scvi"] = model.get_latent_representation()
+    elif method == "ICA":
+        x = adata.X.toarray()
+        res = FastICA().fit_transform(x)
+        adata.obsm["X_ica"] = res
+    else:
+        raise ValueError("Method must be SIMLR, PCA, t-SNE, PHATE, ICA, UMAP or scVI")
     end_time = time.time()
     elapsed = end_time - start_time
     print(method)
