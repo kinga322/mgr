@@ -11,9 +11,10 @@ def run_method(adata, method, n_neighbors=5):
     start_time = time.time()
     tracemalloc.start()
     if method == "SIMLR":
-        x = adata.X
-        simlr = SIMLR_LARGE(x, 5)
-        adata.obsm['X_simlr'] = simlr
+        x = adata.X.todense()
+        simlr = SIMLR_LARGE(10, 5)
+        result = simlr.fit(x)
+        adata.obsm['X_simlr'] = result[1]
     if method == "PCA":
         sc.pp.pca(adata)
     elif method == "PHATE":
@@ -28,12 +29,8 @@ def run_method(adata, method, n_neighbors=5):
         model = SCVI(adata)
         model.train()
         adata.obsm["X_scvi"] = model.get_latent_representation()
-    elif method == "ICA":
-        x = adata.X.toarray()
-        res = FastICA().fit_transform(x)
-        adata.obsm["X_ica"] = res
     else:
-        raise ValueError("Method must be SIMLR, PCA, t-SNE, PHATE, ICA, UMAP or scVI")
+        raise ValueError("Method must be SIMLR, PCA, t-SNE, PHATE, UMAP or scVI")
     end_time = time.time()
     elapsed = end_time - start_time
     print(method)

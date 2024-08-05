@@ -6,12 +6,12 @@ from sklearn.preprocessing import PolynomialFeatures
 from numpy import fromiter
 
 
-def load_adatas(folder="h5ad"):
-    adatas = []
-    names = listdir(f"{folder}")
-    for name in names:
+def load_adatas(folder="h5ad_pca_phate_leiden"):
+    adatas = {}
+    filenames = listdir(f"{folder}")
+    for name in filenames:
         adata = read_h5ad(f"{folder}/{name}")
-        adatas.append(adata)
+        adatas[name.strip(".h5ad")] = adata
     return adatas
 
 
@@ -32,3 +32,10 @@ def scatter_and_line(times_dict, label, degree):
     plt.scatter(keys, vals, label=label)
     plt.plot(sorted(keys), pred)
     plt.legend()
+
+
+def load_single_adata(folder="h5ad_pca_phate_leiden"):
+    adatas = load_adatas()
+    keys = list(adatas.keys())
+    adata = adatas[keys[0]]
+    return adata
